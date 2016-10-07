@@ -22,6 +22,7 @@ plugins.zip = require('gulp-zip');
 
 const _ = require('underscore');
 const series = require('stream-series');
+const lrserver = require('tiny-lr')();
 
 const pkg = require('./package.json');
 const bower = require('./bower.json');

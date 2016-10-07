@@ -1,5 +1,6 @@
 'use strict';
 
+// Use this line before any other require in every test file
 process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
@@ -23,10 +24,10 @@ describe('Post', () => {
 				.post('/api/post')
 				.send(post)
 				.expect(function(res) {
-					post._id = res.body._id
+					post._id = res.body._id;
 				})
 				.expect(200)
-				.expect(post, done)
+				.expect(post, done);
 		});
 
 		it('Shouldn\'t insert an invalid post', done => {

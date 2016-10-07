@@ -1,0 +1,28 @@
+<div>
+	<h2>Posts</h2>
+
+	<div id="post_form">
+		<label for="title">Title:</label>
+		<input type="text" id="title" ng-model="newPost.title"/>
+
+		<label for="content">Content:</label>
+		<textarea id="content" ng-model="newPost.content"></textarea>
+
+		<button ng-click="create()">Create</button>
+	</div>
+	<div id="error" ng-if="error">
+		<h3>{{error.message}}</h3>
+		<ul>
+			<li ng-repeat="e in error.errors">
+				{{e.message}}
+			</li>
+		</ul>
+	</div>
+
+
+	<ul>
+		<li ng-repeat="post in posts">
+			<post info="post"></post>
+		</li>
+	</ul>
+</div>

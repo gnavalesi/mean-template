@@ -17,6 +17,9 @@ function createExpressApp() {
 
 	logger.info('Configuring middlewares');
 
+	// Live-reload
+	app.use(require('connect-livereload')(config.livereload));
+
 	// compress all requests
 	app.use(compress());
 
@@ -36,7 +39,6 @@ function createExpressApp() {
 
 	// MongoClient
 	logger.info('Configuring mongo');
-	const mongoose = require('mongoose');
 	mongoose.Promise = require('q').Promise;
 
 	let db = envConfig.mongo.db;
@@ -54,8 +56,6 @@ function createExpressApp() {
 			mongoose.connection.db.dropDatabase();
 		}
 	});
-
-
 
 	// Swagger
 	if (config.swagger.enabled) {
@@ -93,7 +93,7 @@ function createExpressApp() {
 		staticRoute = 'build_public';
 	}
 	logger.debug('Static folder: Using', staticRoute);
-	app.use(express.static(path.join('..', staticRoute)));
+	app.use(express.static(path.join(staticRoute)));
 
 
 	logger.info('Configuring port', config.server.port);

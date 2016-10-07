@@ -3,7 +3,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const errorHandlers = require('./modules/error-handlers');
 
-const config = require(['.', 'config', 'config'].join(path.sep));
+//const config = require(['.', 'config', 'config'].join(path.sep));
 
 const app = require(['.', 'config', 'express'].join(path.sep));
 
@@ -11,7 +11,7 @@ const app = require(['.', 'config', 'express'].join(path.sep));
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use(cookieParser());
-app.use(require('connect-livereload')(config.livereload));
+//app.use(require('connect-livereload')(config.livereload));
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
