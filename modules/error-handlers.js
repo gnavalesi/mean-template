@@ -1,25 +1,17 @@
 function developmentHandler(err, req, res) {
 	res.status(err.status || 500);
-	if(active) {
-		res.send('error', {
-			message: err.message,
-			error: err
-		});
-	} else {
-		res.send();
-	}
+	res.render('error', {
+		message: err.message,
+		error: err
+	});
 }
 
 function productionHandler(err, req, res) {
 	res.status(err.status || 500);
-	if(active) {
-		res.render('error', {
-			message: err.message,
-			error: {}
-		});
-	} else {
-		res.send();
-	}
+	res.render('error', {
+		message: err.message,
+		error: {}
+	});
 }
 
 module.exports = {

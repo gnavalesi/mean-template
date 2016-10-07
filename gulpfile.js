@@ -67,6 +67,12 @@ const serverFiles = [
 	'!gulpfile.js'
 ];
 
+const customServerFiles = [
+	'./routes/**/*.js',
+	'./controllers/**/*.js',
+	'./models/**/*.js'
+];
+
 const clientFiles = [
 	'public/**/*',
 	'!public/index.html',
@@ -182,7 +188,7 @@ function testFn() {
 		// Creating the reports after tests ran
 		.pipe(plugins.istanbul.writeReports())
 		// Enforce a coverage of at least 80%
-		.pipe(plugins.istanbul.enforceThresholds({thresholds: {global: 10}}))
+		.pipe(plugins.istanbul.enforceThresholds({thresholds: {global: 20}}))
 		.once('error', error => {
 			plugins.util.log(plugins.util.colors.red(error.message));
 			process.exit(1);
@@ -404,9 +410,9 @@ gulp.task('dist:inject', () => {
 });
 
 gulp.task('test:pre', 'Pre tests', () => {
-	return gulp.src(serverFiles)
+	return gulp.src(customServerFiles)
 		.pipe(plugins.istanbul())
 		.pipe(plugins.istanbul.hookRequire());
 });
 
-gulp.task('test:endless', testFn);
+gulp.task('test:endless', ['test:pre'], testFn);

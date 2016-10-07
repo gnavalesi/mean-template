@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const config = require('.' + path.sep + 'config');
 const logger = require(path.join('..', 'modules', 'logger'));
+const mongoose = require('mongoose');
 const envConfig = require('.' + path.sep + 'config-env');
 
 function createExpressApp() {
@@ -38,11 +39,23 @@ function createExpressApp() {
 	const mongoose = require('mongoose');
 	mongoose.Promise = require('q').Promise;
 
-	logger.debug('MongoDB: Conecting to', envConfig.mongo.db, 'in', envConfig.mongo.host + ':' + envConfig.mongo.port);
-	mongoose.connect(envConfig.mongo.host, envConfig.mongo.db, envConfig.mongo.port, {
+	let db = envConfig.mongo.db;
+	if(process.env.NODE_ENV === 'test') {
+		db += '-test';
+	}
+
+	logger.debug('MongoDB: Conecting to', db, 'in', envConfig.mongo.host + ':' + envConfig.mongo.port);
+	mongoose.connect(envConfig.mongo.host, db, envConfig.mongo.port, {
 		user: envConfig.mongo.user,
 		pass: envConfig.mongo.pass
+	}, function() {
+		if(process.env.NODE_ENV === 'test') {
+			logger.debug('MongoDB: Dropping the database');
+			mongoose.connection.db.dropDatabase();
+		}
 	});
+
+
 
 	// Swagger
 	if (config.swagger.enabled) {
