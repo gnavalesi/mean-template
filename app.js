@@ -3,18 +3,14 @@ const path = require('path');
 //var favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const glob = require('glob');
 
 const config = require('./config/config');
 
-const app = express();
+const app = require('./config/express');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(require('connect-livereload')(config.livereload));
 
@@ -26,34 +22,6 @@ if (app.get('env') === 'development') {
 	app.use(express.static(path.join(__dirname, 'build_public')));
 } else {
 	app.use(express.static(path.join(__dirname, 'public')));
-}
-
-/**
- * Load routes
- */
-glob(config.routes, function (err, files) {
-	if (err) {
-		throw err;
-	}
-
-	files.forEach((file) => {
-		const route = '/' + file.replace(/(^routes\/|(\/index|)\.js)/g, '');
-		app.use(route, require('./' + file));
-	});
-});
-
-/**
- * Configure Swagger routes
- */
-if (config.swagger.enabled) {
-	app.get(config.swagger.routes.documentation, (req, res) => {
-		res.jsonp(require('swagger-jsdoc')(config.swagger.options));
-	});
-
-	app.use(config.swagger.routes.ui, require('swaggerize-ui')({
-		docs: config.swagger.routes.documentation,
-		swaggerUiPath: './swagger-ui/dist'
-	}));
 }
 
 
@@ -87,6 +55,5 @@ app.use((err, req, res) => {
 		error: {}
 	});
 });
-
 
 module.exports = app;
