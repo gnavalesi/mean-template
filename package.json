@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-batch": "^1.0.5",
     "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.0",
     "gulp-develop-server": "^0.5.2",
