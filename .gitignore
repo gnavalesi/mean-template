@@ -1,0 +1,9 @@
+
+/.idea/
+/mean-template.iml
+/node_modules/
+/dist/
+/build/
+/bower_components/
+/coverage/
+/build_public/
