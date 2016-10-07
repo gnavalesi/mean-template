@@ -22,10 +22,10 @@ bower install
 + _gulp dev_: Starts the application with live-reload and watch for changes in the client and server to rebuild when necessary.
 + _gulp build_: Makes a development build of the client.
 + _gulp clean_: Cleans the build folders.
-+ _gulp dist_: Creates a dist folder with the files of the built application.
++ _gulp dist_: Creates a build folder with the files of the built application.
 + _gulp eslint_: Verifies good practices in code.
 + _gulp test_: Executes the tests and creates a coverage report.
-+ _gulp package_: Creates a zip with the full project ready for deployment.
++ _gulp package_: Creates a zip with the full project ready for deployment in the dist folder.
 + _gulp help_: Shows the full list of gulp tasks
 
 ### Folder structure

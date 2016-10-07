@@ -91,10 +91,10 @@ gulp.task('dev', 'Starts the application with livereload', seq('run', 'dev:watch
 gulp.task('build', 'Makes a development build of the client', seq('eslint', 'test', 'clean', ['build:copy',
 	'build:bower', 'build:angular'], 'build:inject'));
 
-gulp.task('dist', 'Creates a dist folder with the files of the built application', seq('eslint', 'test', 'clean', ['dist:copy',
+gulp.task('dist', 'Creates a build folder with the files of the built application', seq('eslint', 'test', 'clean', ['dist:copy',
 	'dist:bower', 'dist:angular'], 'dist:inject'));
 
-gulp.task('package', 'Creates a zip with the full project', ['dist'], () => {
+gulp.task('package', 'Creates a zip with the full project in the dist folder', ['dist'], () => {
 	return gulp.src('build/**/*')
 		.pipe(zip(pkg.name + '-' + pkg.version + '.zip'))
 		.pipe(gulp.dest('dist'));
