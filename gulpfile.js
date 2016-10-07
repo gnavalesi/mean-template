@@ -118,7 +118,7 @@ gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
 			newPkg.version = res.version;
 			newPkg.description = res.description;
 
-			newFile('package.json', JSON.stringify(newPkg, null, '\t'))
+			newFile('package.json', JSON.stringify(newPkg, null, '  '))
 				.pipe(gulp.dest('./'));
 
 			const newBower = _.clone(bower);
@@ -126,7 +126,7 @@ gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
 			newBower.version = res.version;
 			newBower.description = res.description;
 
-			newFile('bower.json', JSON.stringify(newBower, null, '\t'))
+			newFile('bower.json', JSON.stringify(newBower, null, '  '))
 				.pipe(gulp.dest('./'));
 		}));
 });
