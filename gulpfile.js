@@ -17,6 +17,7 @@ const concat = require('gulp-concat');
 const inject = require('gulp-inject');
 const transform = require('gulp-json-transform');
 const uglify = require('gulp-uglify');
+const batch = require('gulp-batch');
 
 const series = require('stream-series');
 
@@ -53,6 +54,7 @@ const serverFiles = [
 	'!bower_components/**',
 	'!build/**',
 	'!build_public/**',
+	'!config/config-build.js',
 	'!coverage/**',
 	'!dist/**',
 	'!node_modules/**',
@@ -120,7 +122,7 @@ gulp.task('eslint', 'Verifies good practices in code', () => {
 gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre'], () => {
 
 	// Hide logs from console
-	require('./middlewares/logger').removeConsoleTransport();
+	require('./modules/logger').removeConsoleTransport();
 
 	return gulp.src(testFiles)
 		.pipe(mocha())
@@ -177,7 +179,7 @@ gulp.task('dev:watch:angular', () => {
 });
 
 gulp.task('dev:watch:index', () => {
-	return watch('public/index.html', () => {
+	return watch(['public/index.html'], () => {
 		return injectFn()
 			.pipe(livereload())
 			.pipe(notify('Reload file: <%= file.relative %>'));
@@ -191,27 +193,19 @@ gulp.task('build:copy', () => {
 
 gulp.task('build:bower', ['build:bower:js', 'build:bower:css']);
 
-gulp.task('build:bower:js', _.map(configBuild.dev.js, c => {
-	const taskName = 'build:bower:js:' + c;
+gulp.task('build:bower:js', () => {
+	return gulp.src(_.map(configBuild.dev.js, c => {
+		return './bower_components/' + c;
+	}), {base: './bower_components/'})
+		.pipe(gulp.dest('./build_public/javascripts/'));
+});
 
-	gulp.task(taskName, () => {
-		return gulp.src('./bower_components/' + c, {base: './bower_components/'})
-			.pipe(gulp.dest('./build_public/javascripts/'));
-	});
-
-	return taskName;
-}));
-
-gulp.task('build:bower:css', _.map(configBuild.dev.css, c => {
-	const taskName = 'build:bower:css:' + c;
-
-	gulp.task(taskName, () => {
-		return gulp.src('./bower_components/' + c, {base: './bower_components/'})
-			.pipe(gulp.dest('./build_public/stylesheets/'));
-	});
-
-	return taskName;
-}));
+gulp.task('build:bower:css', () => {
+	return gulp.src(_.map(configBuild.dev.css, c => {
+		return './bower_components/' + c;
+	}), {base: './bower_components/'})
+		.pipe(gulp.dest('./build_public/stylesheets/'));
+});
 
 gulp.task('build:angular', () => {
 	return gulp.src(angularFiles)
@@ -221,17 +215,30 @@ gulp.task('build:angular', () => {
 
 function injectFn() {
 	// Different streams to keep the dependency order
-	const vendorJsSources = gulp.src(['./build_public/javascripts/angular/**/*.js',
-		'./build_public/javascripts/*/**/*.js'], {read: false});
-	const vendorCssSources = gulp.src(['./build_public/stylesheets/*/**/*.css'], {read: false});
+	const vendorJsSources = _.map(configBuild.dev.js, js => {
+		return './build_public/javascripts/' + js;
+	});
 
-	const customJsSources = gulp.src(['./build_public/javascripts/*.js'], {read: false});
-	const customCssSources = gulp.src(['./build_public/stylesheets/*.css'], {read: false});
+	const customJsSources = ['./build_public/javascripts/**/*.js'].concat(_.map(vendorJsSources, js => {
+		return '!' + js;
+	}));
 
-	const appSource = gulp.src(['./build_public/app.js'], {read: false});
+	const vendorCssSources = _.map(configBuild.dev.css, css => {
+		return './build_public/stylesheets/' + css;
+	});
+
+	const customCssSources = ['./build_public/stylesheets/**/*.css'].concat(_.map(vendorCssSources, css => {
+		return '!' + css;
+	}));
+
+	const appSource = ['./build_public/app.js'];
+
+	const streams = _.map([vendorJsSources, customJsSources, vendorCssSources, customCssSources, appSource], s => {
+		return gulp.src(s, {read: false})
+	});
 
 	return gulp.src('./public/index.html')
-		.pipe(inject(series(vendorJsSources, vendorCssSources, customJsSources, customCssSources, appSource), {
+		.pipe(inject(series(streams), {
 			ignorePath: '/build_public/',
 			addRootSlash: false
 		}))
@@ -264,6 +271,21 @@ gulp.task('dist:copy:package.json', () => {
 
 gulp.task('dist:bower', ['dist:bower:js', 'dist:bower:css']);
 
+
+gulp.task('dist:bower:js', () => {
+	return gulp.src(_.map(configBuild.dist.js, c => {
+		return './bower_components/' + c;
+	}), {base: './bower_components/'})
+		.pipe(gulp.dest('./build/public/javascripts/'));
+});
+
+gulp.task('dist:bower:css', () => {
+	return gulp.src(_.map(configBuild.dist.css, c => {
+		return './bower_components/' + c;
+	}), {base: './bower_components/'})
+		.pipe(gulp.dest('./build/public/stylesheets/'));
+});
+
 gulp.task('dist:bower:js', _.map(configBuild.dist.js, c => {
 	const taskName = 'build:bower:js:' + c;
 
@@ -294,16 +316,29 @@ gulp.task('dist:angular', () => {
 });
 
 gulp.task('dist:inject', () => {
-	const vendorJsSources = gulp.src(['./build/public/javascripts/*/**/*.js'], {read: false});
-	const vendorCssSources = gulp.src(['./build/public/css/*/**/*.css'], {read: false});
+	// Different streams to keep the dependency order
+	const vendorJsSources = _.map(configBuild.dist.js, js => {
+		return './build/public/javascripts/' + js;
+	});
+	const customJsSources = ['./build/public/javascripts/**/*.js'].concat(_.map(vendorJsSources, js => {
+		return '!' + js;
+	}));
 
-	const customJsSources = gulp.src(['./build/public/javascripts/*.js'], {read: false});
-	const customCssSources = gulp.src(['./build/public/css/*.css'], {read: false});
+	const vendorCssSources = _.map(configBuild.dist.css, css => {
+		return './build/public/stylesheets/' + css;
+	});
+	const customCssSources = ['./build/public/stylesheets/**/*.css'].concat(_.map(vendorCssSources, css => {
+		return '!' + css;
+	}));
 
-	const appSource = gulp.src(['./build/public/app.js'], {read: false});
+	const appSource = ['./build/public/app.js'];
+
+	const streams = _.map([vendorJsSources, customJsSources, vendorCssSources, customCssSources, appSource], s => {
+		return gulp.src(s, {read: false})
+	});
 
 	return gulp.src('./public/index.html')
-		.pipe(inject(series(vendorJsSources, vendorCssSources, customJsSources, customCssSources, appSource), {
+		.pipe(inject(series(streams), {
 			ignorePath: '/build/public/',
 			addRootSlash: false
 		}))

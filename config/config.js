@@ -7,8 +7,6 @@ const configEnv = require('./config-env');
 const config = {
 	routes: 'routes/**/*.js',
 	autorouting: true,
-	healthTimeOut: 5000,
-
 	logging: {
 		express: false,
 		files: false,

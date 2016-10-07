@@ -5,7 +5,7 @@
  */
 const winston = require('winston');
 const mkdirp = require('mkdirp');
-const time = require('../modules/time');
+const time = require('./time');
 const config = require('../config/config');
 
 const LOG_DIR = config.logging.pathDir;
