@@ -15,9 +15,12 @@ npm install
 bower install
 ```
 
+Then run _gulp init_ to describe your application.
+
 ### Gulp tasks
 
 + _gulp_: Same as _gulp dev_.
++ _gulp init_: Asks for the application information (name, version and description) and updates package.json and bower.json
 + _gulp run_: Starts the application.
 + _gulp dev_: Starts the application with live-reload and watch for changes in the client and server to rebuild when necessary.
 + _gulp build_: Makes a development build of the client.

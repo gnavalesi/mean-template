@@ -40,6 +40,7 @@
     "gulp-livereload": "^3.8.1",
     "gulp-mocha": "^3.0.1",
     "gulp-notify": "^2.2.0",
+    "gulp-prompt": "^0.2.0",
     "gulp-sequence": "^0.4.6",
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",

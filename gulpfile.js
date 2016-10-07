@@ -18,10 +18,13 @@ const inject = require('gulp-inject');
 const transform = require('gulp-json-transform');
 const uglify = require('gulp-uglify');
 const batch = require('gulp-batch');
+const prompt = require('gulp-prompt');
+const util = require('gulp-util');
 
 const series = require('stream-series');
 
 const pkg = require('./package.json');
+const bower = require('./bower.json');
 const config = require('./config/config');
 const configBuild = require('./config/config-build');
 
@@ -74,11 +77,59 @@ const clientFiles = [
 
 const angularFiles = ['./public/app.js', './public/angular/**/*.js'];
 
+function newFile(name, contents) {
+	//uses the node stream object
+	var readableStream = require('stream').Readable({ objectMode: true });
+	//reads in our contents string
+	readableStream._read = () => {
+		readableStream.push(new util.File({ cwd: "", base: "", path: name, contents: new Buffer(contents) }));
+		readableStream.push(null);
+	};
+
+	return readableStream;
+}
+
 /*
  * Main Tasks
  */
 
 gulp.task('default', ['dev']);
+
+gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
+	gulp.src(['package.json', 'bower.json'])
+		.pipe(prompt.prompt([{
+			type: 'input',
+			name: 'name',
+			message: 'name',
+			validate: (v) => typeof v === 'string' && v.length > 0
+		}, {
+			type: 'input',
+			name: 'version',
+			message: 'version',
+			validate: (v) => typeof v === 'string' && v.length > 0
+		}, {
+			type: 'input',
+			name: 'description',
+			message: 'description',
+			validate: (v) => typeof v === 'string'
+		}], function(res) {
+			const newPkg = _.clone(pkg);
+			newPkg.name = res.name;
+			newPkg.version = res.version;
+			newPkg.description = res.description;
+
+			newFile('package.json', JSON.stringify(newPkg, null, '\t'))
+				.pipe(gulp.dest('./'));
+
+			const newBower = _.clone(bower);
+			newBower.name = res.name;
+			newBower.version = res.version;
+			newBower.description = res.description;
+
+			newFile('bower.json', JSON.stringify(newBower, null, '\t'))
+				.pipe(gulp.dest('./'));
+		}));
+});
 
 gulp.task('run', 'Starts the application', ['build'], () => {
 	server.listen(options, () => {
