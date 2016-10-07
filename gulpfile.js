@@ -1,26 +1,26 @@
 'use strict';
 
 const gulp = require('gulp-help')(require('gulp'));
-const server = require('gulp-develop-server');
-const livereload = require('gulp-livereload');
-const eslint = require('gulp-eslint');
-const gutil = require('gulp-util');
-const mocha = require('gulp-mocha');
-const istanbul = require('gulp-istanbul');
-const watch = require('gulp-watch');
-const notify = require('gulp-notify');
-const clean = require('gulp-clean');
-const _ = require('underscore');
-const zip = require('gulp-zip');
-const seq = require('gulp-sequence');
-const concat = require('gulp-concat');
-const inject = require('gulp-inject');
-const transform = require('gulp-json-transform');
-const uglify = require('gulp-uglify');
-const batch = require('gulp-batch');
-const prompt = require('gulp-prompt');
-const util = require('gulp-util');
 
+const plugins = {};
+plugins.clean = require('gulp-clean');
+plugins.concat = require('gulp-concat');
+plugins.eslint = require('gulp-eslint');
+plugins.inject = require('gulp-inject');
+plugins.istanbul = require('gulp-istanbul');
+plugins.livereload = require('gulp-livereload');
+plugins.mocha = require('gulp-mocha');
+plugins.notify = require('gulp-notify');
+plugins.prompt = require('gulp-prompt');
+plugins.seq = require('gulp-sequence');
+plugins.server = require('gulp-develop-server');
+plugins.transform = require('gulp-json-transform');
+plugins.uglify = require('gulp-uglify');
+plugins.util = require('gulp-util');
+plugins.watch = require('gulp-watch');
+plugins.zip = require('gulp-zip');
+
+const _ = require('underscore');
 const series = require('stream-series');
 
 const pkg = require('./package.json');
@@ -29,7 +29,7 @@ const config = require('./config/config');
 const configBuild = require('./config/config-build');
 
 // Disable log notifier
-notify.logLevel(0);
+plugins.notify.logLevel(0);
 
 const options = {
 	path: 'bin/www'
@@ -79,10 +79,10 @@ const angularFiles = ['./public/app.js', './public/angular/**/*.js'];
 
 function newFile(name, contents) {
 	//uses the node stream object
-	var readableStream = require('stream').Readable({ objectMode: true });
+	var readableStream = require('stream').Readable({objectMode: true});
 	//reads in our contents string
 	readableStream._read = () => {
-		readableStream.push(new util.File({ cwd: "", base: "", path: name, contents: new Buffer(contents) }));
+		readableStream.push(new plugins.util.File({cwd: "", base: "", path: name, contents: new Buffer(contents)}));
 		readableStream.push(null);
 	};
 
@@ -97,7 +97,7 @@ gulp.task('default', ['dev']);
 
 gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
 	gulp.src(['package.json', 'bower.json'])
-		.pipe(prompt.prompt([{
+		.pipe(plugins.prompt.prompt([{
 			type: 'input',
 			name: 'name',
 			message: 'name',
@@ -112,7 +112,7 @@ gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
 			name: 'description',
 			message: 'description',
 			validate: (v) => typeof v === 'string'
-		}], function(res) {
+		}], function (res) {
 			const newPkg = _.clone(pkg);
 			newPkg.name = res.name;
 			newPkg.version = res.version;
@@ -132,40 +132,40 @@ gulp.task('init', 'Reinitializes the package.json and bower.json files', () => {
 });
 
 gulp.task('run', 'Starts the application', ['build'], () => {
-	server.listen(options, () => {
-		livereload.listen(_.extend(config.livereload, {basePath: 'build_public'}));
+	plugins.server.listen(options, () => {
+		plugins.livereload.listen(_.extend(config.livereload, {basePath: 'build_public'}));
 	});
 });
 
-gulp.task('dev', 'Starts the application with livereload', seq('run', 'dev:watch'));
+gulp.task('dev', 'Starts the application with livereload', plugins.seq('run', 'dev:watch'));
 
-gulp.task('build', 'Makes a development build of the client', seq('eslint', 'test', 'clean', ['build:copy',
+gulp.task('build', 'Makes a development build of the client', plugins.seq('eslint', 'test', 'clean', ['build:copy',
 	'build:bower', 'build:angular'], 'build:inject'));
 
-gulp.task('dist', 'Creates a build folder with the files of the built application', seq('eslint', 'test', 'clean', ['dist:copy',
+gulp.task('dist', 'Creates a build folder with the files of the built application', plugins.seq('eslint', 'test', 'clean', ['dist:copy',
 	'dist:bower', 'dist:angular'], 'dist:inject'));
 
 gulp.task('package', 'Creates a zip with the full project in the dist folder', ['dist'], () => {
 	return gulp.src('build/**/*')
-		.pipe(zip(pkg.name + '-' + pkg.version + '.zip'))
+		.pipe(plugins.zip(pkg.name + '-' + pkg.version + '.zip'))
 		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('clean', 'Cleans the build and build_public directories', () => {
 	return gulp.src(['./build', './build_public'], {read: false})
-		.pipe(clean({force: true}));
+		.pipe(plugins.clean({force: true}));
 });
 
 gulp.task('eslint', 'Verifies good practices in code', () => {
 	return gulp.src(eslintFiles)
-		.pipe(eslint())
-		.pipe(eslint.format())
-		.pipe(eslint.failAfterError())
-		.on('error', notify.onError(error => {
+		.pipe(plugins.eslint())
+		.pipe(plugins.eslint.format())
+		.pipe(plugins.eslint.failAfterError())
+		.on('error', plugins.notify.onError(error => {
 			return error.message;
 		}))
 		.on('error', error => {
-			gutil.log(error.message);
+			plugins.util.log(error.message);
 			process.exit(1);
 		});
 });
@@ -176,18 +176,18 @@ gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre
 	require('./modules/logger').removeConsoleTransport();
 
 	return gulp.src(testFiles)
-		.pipe(mocha())
-		.once('error', notify.onError(error => {
+		.pipe(plugins.mocha())
+		.once('error', plugins.notify.onError(error => {
 			return error.message;
 		}))
 		// Creating the reports after tests ran
-		.pipe(istanbul.writeReports())
+		.pipe(plugins.istanbul.writeReports())
 		// Enforce a coverage of at least 80%
-		.pipe(istanbul.enforceThresholds({thresholds: {global: 10}}))
+		.pipe(plugins.istanbul.enforceThresholds({thresholds: {global: 10}}))
 		.once('error', error => {
-			gutil.log(gutil.colors.red(error.message));
+			plugins.util.log(plugins.util.colors.red(error.message));
 		})
-		.once('error', notify.onError(error => {
+		.once('error', plugins.notify.onError(error => {
 			return error.message;
 		}));
 });
@@ -199,41 +199,41 @@ gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre
 gulp.task('dev:watch', ['dev:watch:server', 'dev:watch:client', 'dev:watch:angular', 'dev:watch:index']);
 
 gulp.task('dev:watch:server', () => {
-	return watch(serverFiles, vinyl => {
+	return plugins.watch(serverFiles, vinyl => {
 		return gulp.src(vinyl.path)
-			.pipe(eslint())
-			.pipe(eslint.format())
-			.pipe(server())
-			.pipe(notify('Reload file: <%= file.relative %>'));
+			.pipe(plugins.eslint())
+			.pipe(plugins.eslint.format())
+			.pipe(plugins.server())
+			.pipe(plugins.notify('Reload file: <%= file.relative %>'));
 	});
 });
 
 gulp.task('dev:watch:client', () => {
-	return watch(clientFiles)
-		.pipe(eslint())
-		.pipe(eslint.format())
+	return plugins.watch(clientFiles)
+		.pipe(plugins.eslint())
+		.pipe(plugins.eslint.format())
 		.pipe(gulp.dest('build_public'))
-		.pipe(livereload())
-		.pipe(notify('Reload file: <%= file.relative %>'));
+		.pipe(plugins.livereload())
+		.pipe(plugins.notify('Reload file: <%= file.relative %>'));
 });
 
 gulp.task('dev:watch:angular', () => {
-	return watch(angularFiles, () => {
+	return plugins.watch(angularFiles, () => {
 		return gulp.src(angularFiles)
-			.pipe(eslint())
-			.pipe(eslint.format())
-			.pipe(concat('app.js'))
+			.pipe(plugins.eslint())
+			.pipe(plugins.eslint.format())
+			.pipe(plugins.concat('app.js'))
 			.pipe(gulp.dest('./build_public/'))
-			.pipe(livereload())
-			.pipe(notify('Reload file: <%= file.relative %>'));
+			.pipe(plugins.livereload())
+			.pipe(plugins.notify('Reload file: <%= file.relative %>'));
 	});
 });
 
 gulp.task('dev:watch:index', () => {
-	return watch(['public/index.html'], () => {
+	return plugins.watch(['public/index.html'], () => {
 		return injectFn()
-			.pipe(livereload())
-			.pipe(notify('Reload file: <%= file.relative %>'));
+			.pipe(plugins.livereload())
+			.pipe(plugins.notify('Reload file: <%= file.relative %>'));
 	});
 });
 
@@ -260,7 +260,7 @@ gulp.task('build:bower:css', () => {
 
 gulp.task('build:angular', () => {
 	return gulp.src(angularFiles)
-		.pipe(concat('app.js'))
+		.pipe(plugins.concat('app.js'))
 		.pipe(gulp.dest('./build_public/'));
 });
 
@@ -289,7 +289,7 @@ function injectFn() {
 	});
 
 	return gulp.src('./public/index.html')
-		.pipe(inject(series(streams), {
+		.pipe(plugins.inject(series(streams), {
 			ignorePath: '/build_public/',
 			addRootSlash: false
 		}))
@@ -312,7 +312,7 @@ gulp.task('dist:copy:server', () => {
 
 gulp.task('dist:copy:package.json', () => {
 	return gulp.src('./package.json')
-		.pipe(transform(data => {
+		.pipe(plugins.transform(data => {
 			delete data.devDependencies;
 
 			return data;
@@ -361,8 +361,8 @@ gulp.task('dist:bower:css', _.map(configBuild.dist.css, c => {
 
 gulp.task('dist:angular', () => {
 	gulp.src(angularFiles)
-		.pipe(concat('app.js'))
-		.pipe(uglify())
+		.pipe(plugins.concat('app.js'))
+		.pipe(plugins.uglify())
 		.pipe(gulp.dest('./build/public/'));
 });
 
@@ -389,7 +389,7 @@ gulp.task('dist:inject', () => {
 	});
 
 	return gulp.src('./public/index.html')
-		.pipe(inject(series(streams), {
+		.pipe(plugins.inject(series(streams), {
 			ignorePath: '/build/public/',
 			addRootSlash: false
 		}))
@@ -398,7 +398,7 @@ gulp.task('dist:inject', () => {
 
 gulp.task('test:pre', 'Pre tests', () => {
 	return gulp.src(serverFiles)
-		.pipe(istanbul())
-		.pipe(istanbul.hookRequire());
+		.pipe(plugins.istanbul())
+		.pipe(plugins.istanbul.hookRequire());
 });
 
