@@ -2,12 +2,11 @@
 
 const moment = require('moment-timezone');
 
-const BUENOS_AIRES_TIME_ZONE = 'America/Argentina/Buenos_Aires';
+const config = require('../config/config');
 
-function getBAMoment(format) {
-	return moment().tz(BUENOS_AIRES_TIME_ZONE).format(format);
+function getMoment(format) {
+	return moment().tz(config.timezone).format(format);
 }
 
-
-module.exports.getBAMoment = getBAMoment;
+module.exports.getMoment = getMoment;
 

@@ -21,6 +21,7 @@ const config = {
 	token: {
 		secretToken: 'development'
 	},
+	timezone: 'America/Argentina/Buenos_Aires',
 	corsConfig: {
 		origin: '*',
 		methods: [

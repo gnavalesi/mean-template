@@ -18,7 +18,7 @@ const console = new winston.transports.Console({
 	prettyPrint: true,
 	handleExceptions: true,
 	timestamp: () => {
-		return time.getBAMoment(FORMAT_TIME);
+		return time.getMoment(FORMAT_TIME);
 	}
 });
 
@@ -33,7 +33,7 @@ const allFile = new winston.transports.File({
 	prettyPrint: true,
 	handleExceptions: true,
 	timestamp: () => {
-		return time.getBAMoment(FORMAT_TIME);
+		return time.getMoment(FORMAT_TIME);
 	}
 });
 
@@ -48,7 +48,7 @@ const errorFile = new winston.transports.File({
 	prettyPrint: true,
 	handleExceptions: true,
 	timestamp: () => {
-		return time.getBAMoment(FORMAT_TIME);
+		return time.getMoment(FORMAT_TIME);
 	}
 });
 

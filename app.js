@@ -1,29 +1,17 @@
-const express = require('express');
-const path = require('path');
 //var favicon = require('serve-favicon');
-const logger = require('morgan');
+const path = require('path');
 const cookieParser = require('cookie-parser');
+const errorHandlers = require('./modules/error-handlers');
 
-const config = require('./config/config');
+const config = require(['.', 'config', 'config'].join(path.sep));
 
-const app = require('./config/express');
+const app = require(['.', 'config', 'express'].join(path.sep));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+
 app.use(cookieParser());
 app.use(require('connect-livereload')(config.livereload));
-
-
-/**
- * Set static folder for development
- */
-if (app.get('env') === 'development') {
-	app.use(express.static(path.join(__dirname, 'build_public')));
-} else {
-	app.use(express.static(path.join(__dirname, 'public')));
-}
-
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -37,23 +25,11 @@ app.use((req, res, next) => {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-	app.use((err, req, res) => {
-		res.status(err.status || 500);
-		res.render('error', {
-			message: err.message,
-			error: err
-		});
-	});
+	app.use(errorHandlers.developmentHandler);
 }
 
 // production error handler
 // no stacktraces leaked to user
-app.use((err, req, res) => {
-	res.status(err.status || 500);
-	res.render('error', {
-		message: err.message,
-		error: {}
-	});
-});
+app.use(errorHandlers.productionHandler);
 
 module.exports = app;

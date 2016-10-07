@@ -1,15 +1,15 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const morganLogger = require('morgan');
 const compress = require('compression');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const config = require('./config');
-const logger = require('../modules/logger');
-const glob = require('glob');
-const mongoClient = require('../modules/mongodb-client');
+const config = require('.' + path.sep + 'config');
+const logger = require(path.join('..', 'modules', 'logger'));
+const envConfig = require('.' + path.sep + 'config-env');
 
 function createExpressApp() {
 	const app = express();
@@ -35,7 +35,14 @@ function createExpressApp() {
 
 	// MongoClient
 	logger.info('Configuring mongo');
-	mongoClient.connect();
+	const mongoose = require('mongoose');
+	mongoose.Promise = require('q').Promise;
+
+	logger.debug('MongoDB: Conecting to', envConfig.mongo.db, 'in', envConfig.mongo.host + ':' + envConfig.mongo.port);
+	mongoose.connect(envConfig.mongo.host, envConfig.mongo.db, envConfig.mongo.port, {
+		user: envConfig.mongo.user,
+		pass: envConfig.mongo.pass
+	});
 
 	// Swagger
 	if (config.swagger.enabled) {
@@ -49,7 +56,7 @@ function createExpressApp() {
 		logger.debug('Swagger: Using', config.swagger.routes.ui, 'route for ui');
 		app.use(config.swagger.routes.ui, require('swaggerize-ui')({
 			docs: config.swagger.routes.documentation,
-			swaggerUiPath: './swagger-ui/dist'
+			swaggerUiPath: path.join('swagger-ui', 'dist')
 		}));
 	}
 
@@ -57,14 +64,24 @@ function createExpressApp() {
 	if (config.autorouting) {
 		logger.info('Configuring auto-routing');
 
-		const files = glob.sync(config.routes);
+		const files = require('glob').sync(config.routes);
 
 		files.forEach((file) => {
 			const route = '/' + file.replace(/(^(\.\/|)routes\/|((\/|)index|)\.js$)/g, '');
 			logger.debug('Auto-routing: Using', file, 'router for route', route);
-			app.use(route, require('../' + file));
+			app.use(route, require(path.join('..', file)));
 		});
 	}
+
+	// Static folder
+	logger.info('Configuring static folder');
+	let staticRoute = 'public';
+	if (app.get('env') === 'development') {
+		staticRoute = 'build_public';
+	}
+	logger.debug('Static folder: Using', staticRoute);
+	app.use(express.static(path.join('..', staticRoute)));
+
 
 	logger.info('Configuring port', config.server.port);
 	app.set('port', config.server.port);

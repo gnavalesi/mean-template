@@ -139,10 +139,10 @@ gulp.task('run', 'Starts the application', ['build'], () => {
 
 gulp.task('dev', 'Starts the application with livereload', plugins.seq('run', 'dev:watch'));
 
-gulp.task('build', 'Makes a development build of the client', plugins.seq('eslint', 'test', 'clean', ['build:copy',
+gulp.task('build', 'Makes a development build of the client', plugins.seq('eslint', 'test:endless', 'clean', ['build:copy',
 	'build:bower', 'build:angular'], 'build:inject'));
 
-gulp.task('dist', 'Creates a build folder with the files of the built application', plugins.seq('eslint', 'test', 'clean', ['dist:copy',
+gulp.task('dist', 'Creates a build folder with the files of the built application', plugins.seq('eslint', 'test:endless', 'clean', ['dist:copy',
 	'dist:bower', 'dist:angular'], 'dist:inject'));
 
 gulp.task('package', 'Creates a zip with the full project in the dist folder', ['dist'], () => {
@@ -170,8 +170,7 @@ gulp.task('eslint', 'Verifies good practices in code', () => {
 		});
 });
 
-gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre'], () => {
-
+function testFn() {
 	// Hide logs from console
 	require('./modules/logger').removeConsoleTransport();
 
@@ -186,10 +185,18 @@ gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre
 		.pipe(plugins.istanbul.enforceThresholds({thresholds: {global: 10}}))
 		.once('error', error => {
 			plugins.util.log(plugins.util.colors.red(error.message));
+			process.exit(1);
 		})
 		.once('error', plugins.notify.onError(error => {
 			return error.message;
 		}));
+}
+
+gulp.task('test', 'Executes the tests and creates a coverage report', ['test:pre'], () => {
+	return testFn()
+		.once('end', () => {
+			process.exit();
+		});
 });
 
 /*
@@ -402,3 +409,4 @@ gulp.task('test:pre', 'Pre tests', () => {
 		.pipe(plugins.istanbul.hookRequire());
 });
 
+gulp.task('test:endless', testFn);
