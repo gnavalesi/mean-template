@@ -11,7 +11,7 @@ module.exports = function (config) {
 		'bower_components/angular-mocks/angular-mocks.js',
 		'build_public/app.js',
 		'build/public/app.js',
-		'test/client/**/*.js'
+		'test/public/**/*.js'
 	]);
 
 	//files = files.concat();
