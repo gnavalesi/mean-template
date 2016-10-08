@@ -19,5 +19,6 @@
     "angular": "^1.5.8",
     "angular-route": "^1.5.8",
     "angular-resource": "^1.5.8"
-  }
+  },
+  "version": "1.0.0"
 }
