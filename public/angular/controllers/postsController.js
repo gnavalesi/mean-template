@@ -1,7 +1,7 @@
 /* global app */
 
 app.controller({
-	'PostController': function ($scope, PostService) {
+	'PostsController': function ($scope, PostService) {
 		$scope.posts = [];
 		$scope.newPost = {};
 		$scope.error = null;
@@ -24,7 +24,7 @@ app.controller({
 app.config(function ($routeProvider) {
 	$routeProvider
 		.when('/post', {
-			controller: 'PostController',
+			controller: 'PostsController',
 			templateUrl: 'views/posts.html'
 		})
 		.otherwise('/post');

@@ -6,7 +6,7 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const _ = require('underscore');
 
-const app = require('../app.js');
+const app = require('../../app.js');
 
 const post = {
 	title: 'Post title',
@@ -78,7 +78,7 @@ describe('Post', () => {
 			update.title = 'Title updated';
 
 			request(app)
-				.put('/api/post')
+				.put('/api/post/' + post._id)
 				.send(update)
 				.expect(200)
 				.expect(update, done);
@@ -87,10 +87,9 @@ describe('Post', () => {
 		it('Shouldn\'t update a post with an inexisting id', done => {
 			const update = _.clone(post);
 			update.title = 'Title updated';
-			update._id = '57f80f3c8850386168a27e1e';
 
 			request(app)
-				.put('/api/post')
+				.put('/api/post/57f80f3c8850386168a27e1e')
 				.send(update)
 				.expect(200)
 				.expect({}, done);
@@ -99,10 +98,9 @@ describe('Post', () => {
 		it('Should return an error for an invalid id', done => {
 			const update = _.clone(post);
 			update.title = 'Title updated';
-			update._id = '0';
 
 			request(app)
-				.put('/api/post')
+				.put('/api/post/0')
 				.send(update)
 				.expect(503, done);
 		});

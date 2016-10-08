@@ -5,8 +5,8 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 
-const app = require('../app.js');
-const pkg = require('../package.json');
+const app = require('../../app.js');
+const pkg = require('../../package.json');
 
 describe('Version', () => {
 	describe('#get api/version', () => {

@@ -8,6 +8,7 @@ plugins.concat = require('gulp-concat');
 plugins.eslint = require('gulp-eslint');
 plugins.inject = require('gulp-inject');
 plugins.istanbul = require('gulp-istanbul');
+plugins.karma = require('karma').Server;
 plugins.livereload = require('gulp-livereload');
 plugins.mocha = require('gulp-mocha');
 plugins.notify = require('gulp-notify');
@@ -22,7 +23,6 @@ plugins.zip = require('gulp-zip');
 
 const _ = require('underscore');
 const series = require('stream-series');
-const lrserver = require('tiny-lr')();
 
 const pkg = require('./package.json');
 const bower = require('./bower.json');
@@ -36,20 +36,26 @@ const options = {
 	path: 'bin/www'
 };
 
-const testFiles = [
-	'test/**/*.js'
+const testServerFiles = [
+	'test/server/**/*.js'
+];
+
+const testClientFiles = [
+	'test/client/**/*.js'
 ];
 
 const eslintFiles = [
 	'./**/*.js',
 	'!gulpfile.js',
+	'.karma.conf.js',
 	'!bower_components/**',
 	'!build/**',
 	'!build_public/**',
 	'!coverage/**',
 	'!dist/**',
 	'!node_modules/**',
-	'!swagger-ui/**'
+	'!swagger-ui/**',
+	'!test/**'
 ];
 
 const serverFiles = [
@@ -146,10 +152,10 @@ gulp.task('run', 'Starts the application', ['build'], () => {
 
 gulp.task('dev', 'Starts the application with livereload', plugins.seq('run', 'dev:watch'));
 
-gulp.task('build', 'Makes a development build of the client', plugins.seq('eslint', 'test:endless', 'clean', ['build:copy',
-	'build:bower', 'build:angular'], 'build:inject'));
+gulp.task('build', 'Makes a development build of the client', plugins.seq('eslint', 'test:endless:server', 'clean', ['build:copy',
+	'build:bower', 'build:angular'], 'build:inject', 'test:endless:client'));
 
-gulp.task('dist', 'Creates a build folder with the files of the built application', plugins.seq('eslint', 'test:endless', 'clean', ['dist:copy',
+gulp.task('dist', 'Creates a build folder with the files of the built application', plugins.seq('eslint', 'test:endless:server', 'clean', ['dist:copy',
 	'dist:bower', 'dist:angular'], 'dist:inject'));
 
 gulp.task('package', 'Creates a zip with the full project in the dist folder', ['dist'], () => {
@@ -181,7 +187,7 @@ function testFn() {
 	// Hide logs from console
 	require('./modules/logger').removeConsoleTransport();
 
-	return gulp.src(testFiles)
+	return gulp.src(testServerFiles)
 		.pipe(plugins.mocha())
 		.once('error', plugins.notify.onError(error => {
 			return error.message;
@@ -416,4 +422,10 @@ gulp.task('test:pre', 'Pre tests', () => {
 		.pipe(plugins.istanbul.hookRequire());
 });
 
-gulp.task('test:endless', ['test:pre'], testFn);
+gulp.task('test:endless:server', ['test:pre'], testFn);
+
+gulp.task('test:endless:client', done => {
+	new plugins.karma({
+		configFile: __dirname + '/karma.conf.js'
+	}, done).start();
+});
