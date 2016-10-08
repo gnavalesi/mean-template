@@ -29,7 +29,7 @@ function insert(req, res) {
 }
 
 function update(req, res) {
-	return Post.findByIdAndUpdate(req.body._id, req.body, {
+	return Post.findByIdAndUpdate(req.params.id, req.body, {
 		'new': true
 	}).then(post => {
 		res.status(200).send(post);
