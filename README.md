@@ -1,6 +1,6 @@
 # MEAN Template
 
-A MEAN Stack (Mongo, Express, Angular, Node) application template. It uses:
+A MEAN Stack (MongoDB, Express, Angular, Node) application template. It uses:
 
 + Gulp for quick development with live-reload and tasks for testing and packaging
 + Mongoose as a MongoDB driver and Schema definition
