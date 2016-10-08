@@ -3,9 +3,10 @@
 A MEAN Stack (Mongo, Express, Angular, Node) application template. It uses:
 
 + Gulp for quick development with live-reload and tasks for testing and packaging
-+ Mongoose as a MongoDB driver
++ Mongoose as a MongoDB driver and Schema definition
 + Swagger to document your models and routers
 + Bower to manage your client side javascript dependencies
++ Mocha to run tests and Istanbul for coverage reports
 
 ## Usage
 
@@ -34,7 +35,7 @@ Then run _gulp init_ to describe your application.
 ### Folder structure
 
 + **/bin**: Scripts.
-    * www: Express initialization script.
+    * **www**: Express initialization script.
 + **/config**: Configuration.
     * **config.js**: General application configuration file.
     * **config-build.js**: Lists the bower files to add to the client. 
@@ -86,4 +87,8 @@ The _index.html_ file contains two comments where the dependencies will be injec
 files listed in _config/config-build.js_ are injected, then the files in _public/javascript_ and _public/stylesheets_
 are injected, ant then the concatenated version of _public/app.js_ with the files in _public/angular_ folder.
 This order is kept to load your dependencies before your scripts and your stylesheets.
+
+### Mongoose Schemas
+
+For more information about mongoose schemas go to [http://mongoosejs.com/docs/guide.html](http://mongoosejs.com/docs/guide.html)
 
