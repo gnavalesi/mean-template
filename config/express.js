@@ -4,6 +4,7 @@ const path = require('path');
 const express = require('express');
 const morganLogger = require('morgan');
 const compress = require('compression');
+const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
@@ -22,6 +23,9 @@ function createExpressApp() {
 
 	// compress all requests
 	app.use(compress());
+
+	// get cookies in requests
+	app.use(cookieParser());
 
 	// Request body parsing middleware should be above methodOverride
 	app.use(bodyParser.urlencoded({
