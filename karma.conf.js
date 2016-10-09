@@ -54,7 +54,15 @@ module.exports = function (config) {
 				type: 'lcov'
 			}, {
 				type: 'text'
-			}]
+			}],
+			check: {
+				global: {
+					statements: 30,
+					branches: 30,
+					functions: 30,
+					lines: 30
+				}
+			}
 		},
 
 

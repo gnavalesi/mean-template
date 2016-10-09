@@ -3,6 +3,7 @@
 const gulp = require('gulp-help')(require('gulp'));
 const mocha = require('gulp-spawn-mocha');
 const seq = require('gulp-sequence');
+const util = require('gulp-util');
 
 const karma = require('karma').Server;
 const path = require('path');
@@ -11,12 +12,17 @@ const testServerFiles = [
 	'./test/server/**/*.js'
 ];
 
-gulp.task('test:core', false, seq(['test:core:client', 'test:core:server']));
+gulp.task('test:core', false, seq('test:core:client', 'test:core:server'));
 
 gulp.task('test:core:client', false, (done) => {
 	new karma({
 		configFile: path.resolve('karma.conf.js')
-	}, done).start();
+	}, exitCode => {
+		if (exitCode !== 0) {
+			process.exit(exitCode);
+		}
+		done();
+	}).start();
 });
 
 gulp.task('test:core:server', false, () => {
