@@ -92,3 +92,8 @@ This order is kept to load your dependencies before your scripts and your styles
 
 For more information about mongoose schemas go to [http://mongoosejs.com/docs/guide.html](http://mongoosejs.com/docs/guide.html)
 
+## Version History
+
+### v1.0.1
++ Added Karma for client-side testing
++ Improved Gulp configuration
