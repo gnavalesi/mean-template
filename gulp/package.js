@@ -30,7 +30,9 @@ gulp.task('package:core:copy', false, seq(['package:core:copy:client', 'package:
 	'package:core:copy:package.json']));
 
 gulp.task('package:core:copy:client', false, () => {
-	return gulp.src('./build_public')
+	return gulp.src('./build_public/**/*', {
+		base: './build_public/'
+	})
 		.pipe(gulp.dest('./build/public'));
 });
 
